@@ -34,6 +34,10 @@
 #include "movie_player.h"
 #include "cache_progress.h"
 #include "patches.h"
+#include "sprite_pool.h"
+#include "palette_cache.h"
+#include "sprite_census.h"
+#include "func_prof.h"
 
 static void *heap_so_base = NULL;
 static size_t heap_so_limit = 0;
@@ -824,6 +828,15 @@ int main(void) {
   // and skips safely if it encounters an unexpected instruction word, so a
   // future .so rebuild won't silently corrupt -- it just prints a warning.
   apply_game_patches(&game_mod);
+#if SPRITE_CENSUS
+  apply_sprite_census(&game_mod);
+#endif
+  // after the census so the pool hook sees the game's real return addresses
+  apply_sprite_pool(&game_mod);
+  apply_palette_cache(&game_mod);
+#if FUNC_PROFILER
+  apply_func_prof(&game_mod);
+#endif
 
   // Force the UI/text language to config.language regardless of what the engine
   // detects. resources.bin contains all languages under Localize/<code>/; the
@@ -1067,7 +1080,18 @@ int main(void) {
     if (!fi_freq2) fi_freq2 = armGetSystemTickFreq();
     const u64 t_render_start = armGetSystemTick();
 #endif
+    sprite_pool_frame();
+    palette_cache_frame();
+#if SPRITE_CENSUS || FUNC_PROFILER
+    const u64 census_t0 = armGetSystemTick();
+#endif
     e_nativeRender(fake_env);
+#if SPRITE_CENSUS
+    census_frame(armGetSystemTick() - census_t0);
+#endif
+#if FUNC_PROFILER
+    prof_frame(armGetSystemTick() - census_t0);
+#endif
 #if DEBUG_INSTR
     const u64 t_render_end = armGetSystemTick();
 #endif

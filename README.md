@@ -132,6 +132,21 @@ It's grouped into sections; here's what each key does and its default.
 * `gl_no_error` *(default 1)* — skip mesa's internal validation of GL calls,
   removing CPU overhead on a path that fires constantly. The engine's calls are
   already well-formed, so this is safe to leave on.
+  * `reuse_draw_objects` *(default 0)* — (experimental) the engine draws many things by
+  creating a new sprite (or even a whole off-screen render target) for every
+  element, every frame, and throwing it away afterwards. A few effects do this
+  hundreds of times per frame — the world-map clouds and the Black Omen, tiled
+  battle effect backgrounds such as Haste, raster effects on the field — which
+  costs tens of milliseconds of CPU. With this on, those objects are reused
+  instead, reset to exactly the state a new one would have, so the picture is
+  the same but those scenes no longer slow down. Only call sites that
+  `tools/pool_analyze.py` proved safe are affected. Off by default while it is
+  experimental; turn it off again if you ever see a visual difference.
+  * `cache_palettes` *(default 0)* — (experimental) every palette-shaded object on the world
+  map (Black Omen, Ozzie's fort, the Epoch, ...) got a freshly uploaded palette
+  texture every frame; near large objects that's dozens of texture uploads per
+  frame. With this on, objects with the same palette share one texture with
+  identical contents. Off by default while it is experimental.
 
 **Visual & movement fixes** — these smooth out a handful of quirks left over
 from the original phone version: filtering, alignment, camera zoom, and a

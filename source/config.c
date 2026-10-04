@@ -73,6 +73,8 @@
   CONFIG_VAR_INT(native_controller); \
   CONFIG_VAR_INT(controller_glyphs); \
   CONFIG_VAR_INT(fix_diagonal_movement); \
+  CONFIG_VAR_INT(reuse_draw_objects); \
+  CONFIG_VAR_INT(cache_palettes); \
   CONFIG_VAR_FLOAT(map_zoom_y_trim);
 
 Config config;
@@ -127,6 +129,8 @@ static void set_defaults(void) {
   config.native_controller = 1;    // native controller input -> Switch-button prompts
   config.controller_glyphs = 1;    // force <BTN_*> dialogue tags to the pad glyph set
   config.fix_diagonal_movement = 1; // smooth diagonal movement (matches cardinal speed)
+  config.reuse_draw_objects = 0;    // reuse the engine's per-frame throw-away sprites / render targets (experimental)
+  config.cache_palettes = 0;        // share world-map palette textures instead of rebuilding them per frame (experimental)
   config.right_stick_mirror = 1;    // right stick emulates the left stick (movement)
   strlcpy(config.key_zl,    "key_zl",    sizeof(config.key_zl));    // unused buttons remap to themselves by default (no-op)
   strlcpy(config.key_zr,    "key_zr",    sizeof(config.key_zr));

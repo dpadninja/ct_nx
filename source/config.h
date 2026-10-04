@@ -43,6 +43,14 @@
 // Both files land next to config.ini in /switch/ct/.
 #define DEBUG_INSTR 0
 
+// Opt-in diagnostic: count cocos2d object creation per call site and write
+// the busiest sites to census.log every ~5s (see sprite_census.c).
+#define SPRITE_CENSUS 0
+
+// Opt-in diagnostic: time the game code (main thread only) and write the
+// most expensive functions to prof.log every ~5s (see func_prof.c).
+#define FUNC_PROFILER 0
+
 extern int screen_width;
 extern int screen_height;
 
@@ -179,6 +187,21 @@ typedef struct {
   //                          target every frame and reads as a stutter.
   //                          Pure visual/feel fix; no save-data impact.
   int fix_diagonal_movement;
+  // reuse_draw_objects -- EXPERIMENTAL. 1 = at the call sites listed in
+  //             pool_sites.h, reuse the sprites / render textures the engine
+  //             otherwise creates and destroys every frame (per-scanline and
+  //             per-tile effects, the world-map clouds and Black Omen, battle
+  //             effect backgrounds, ...). Each reused object is reset to the
+  //             state a newly created one would have, so the output is the
+  //             same. Big CPU saving in effect-heavy scenes. 0 = stock
+  //             (default while experimental).
+  int reuse_draw_objects;
+  // cache_palettes -- EXPERIMENTAL. 1 = world-map objects drawn with the
+  //             palette shader (Black Omen, Ozzie's fort, the Epoch, ...)
+  //             share one palette texture per distinct palette instead of
+  //             uploading a new one per object every frame (palette_cache.c).
+  //             Same texture contents. 0 = stock (default while experimental).
+  int cache_palettes;
   // fixed_timestep -- 1 = force cocos2d's per-frame delta (Director::_deltaTime)
   //                   to a constant 1/60s instead of the measured wall-clock gap.
   //                   Vsync locks presentation to 60Hz, but the measured delta
