@@ -181,6 +181,42 @@ launch rather than instantly.
 * `map_zoom_fix` *(default 1)* / `map_zoom` *(default 2.0)* — the same fix
   and zoom control, for the overworld map screen. Recommend values are currently 2.0 and 1.75.
 
+**CRT filter**
+
+- `crt_filter` *(default 0)* — draw the game through a CRT shader. Costs two
+extra passes on the GPU.
+  * `1` — **soft**: a light retro look modelled on the CRT mode of Square
+  Enix's Pixel Remaster ports (fine scanlines, slight blur, red/blue
+  fringing). Keeps the picture sharp. Tuned with:
+    - `crt_soft_scanlines` *(default 0.15)* — how much the dark half of each
+    scanline is darkened, `0`..`1`.
+    - `crt_soft_lines` *(default 120)* — scanlines over the screen height.
+    - `crt_soft_blur` *(default 0.5)* — horizontal blur radius (pixels at 720p).
+    - `crt_soft_fringe` *(default 0.75)* — red/blue colour fringing (pixels at 720p).
+    The Pixel Remaster uses about `2.25` and `3` on the game picture but almost
+    none on its menus; here menus and text are filtered too, so the defaults
+    match its menu look and keep text sharp. Try `1.0` / `1.5` for a softer,
+    more retro picture.
+  * `2` — **CRTS**: a port of Timothy Lottes' public-domain CRT-styled scaler,
+  the algorithm behind RetroArch's `crt-lottes-fast`. The frame is reduced to
+  the game's own resolution (one pixel per art pixel), then rebuilt as a tube
+  would draw it: scanlines, horizontal blur, phosphor mask and light
+  curvature, in linear light. The options below use the same names, ranges
+  and defaults as the RetroArch shader:
+- `crt_scanline_thinness` *(default 0.5)* — `0` fused .. `1` thin scanlines.
+- `crt_scan_blur` *(default 2.5)* — horizontal sharpness, `1` blurry .. `6` sharp.
+- `crt_mask_type` *(default 1)* — `0` none, `1` aperture grille (lite),
+`2` aperture grille, `3` shadow mask.
+- `crt_mask_intensity` *(default 0.5)* — `0`..`1`.
+- `crt_curvature` *(default 0.02)* — `0` for a flat screen, up to `0.25`.
+- `crt_corner` *(default 3)* — corner rounding, `0`..`11`.
+- `crt_gamma` *(default 2.4)* — CRT gamma.
+- `crt_brightness` *(default 1.0)* — extra brightness (both styles).
+- `crt_lines` *(default 0)* — scanlines over the screen height; `0` picks one
+per art-pixel row (`360 / field_zoom`, i.e. 180 at zoom 2). Menu text is
+reduced to the same resolution, like on the console; a higher value such
+as `360` keeps it sharper but looks less like a CRT.
+
 **Input / controller**
 * `native_controller` *(default 1)* — drive the engine purely through its
   native controller path, so on-screen prompts and dialogue button tags show

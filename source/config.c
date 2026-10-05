@@ -51,6 +51,21 @@
   CONFIG_VAR_INT(force_nearest); \
   CONFIG_COMMENT("--- Performance ---"); \
   CONFIG_VAR_INT(fixed_timestep); \
+  CONFIG_COMMENT("--- CRT filter ---"); \
+  CONFIG_VAR_INT(crt_filter); \
+  CONFIG_VAR_FLOAT(crt_brightness); \
+  CONFIG_VAR_FLOAT(crt_soft_scanlines); \
+  CONFIG_VAR_FLOAT(crt_soft_lines); \
+  CONFIG_VAR_FLOAT(crt_soft_blur); \
+  CONFIG_VAR_FLOAT(crt_soft_fringe); \
+  CONFIG_VAR_FLOAT(crt_scanline_thinness); \
+  CONFIG_VAR_FLOAT(crt_scan_blur); \
+  CONFIG_VAR_INT(crt_mask_type); \
+  CONFIG_VAR_FLOAT(crt_mask_intensity); \
+  CONFIG_VAR_FLOAT(crt_curvature); \
+  CONFIG_VAR_FLOAT(crt_corner); \
+  CONFIG_VAR_FLOAT(crt_gamma); \
+  CONFIG_VAR_FLOAT(crt_lines); \
   CONFIG_COMMENT("--- Performance (experimental) ---"); \
   CONFIG_VAR_INT(reuse_draw_objects); \
   CONFIG_VAR_INT(cache_palettes); \
@@ -131,6 +146,20 @@ static void set_defaults(void) {
   config.controller_glyphs = 1;    // force <BTN_*> dialogue tags to the pad glyph set
   config.fix_diagonal_movement = 1; // smooth diagonal movement (matches cardinal speed)
   config.reuse_draw_objects = 0;    // reuse the engine's per-frame throw-away sprites / render targets (experimental)
+  config.crt_filter = 0;              // 0 off, 1 soft (Pixel Remaster-like), 2 CRTS (crt-lottes-fast)
+  config.crt_soft_scanlines = 0.15f;  // soft style, measured from Pixel Remaster's CRT mode
+  config.crt_soft_lines = 120.0f;
+  config.crt_soft_blur = 0.5f;     // Pixel Remaster: ~2.25 on the game, ~0 on menus; menus are filtered here too
+  config.crt_soft_fringe = 0.75f;  // Pixel Remaster: ~3 on the game, ~0.5 on menus
+  config.crt_scanline_thinness = 0.5f; // defaults below match RetroArch's crt-lottes-fast
+  config.crt_scan_blur = 2.5f;
+  config.crt_mask_type = 1;
+  config.crt_mask_intensity = 0.5f;
+  config.crt_curvature = 0.02f;
+  config.crt_corner = 3.0f;
+  config.crt_gamma = 2.4f;
+  config.crt_brightness = 1.0f;
+  config.crt_lines = 0.0f;            // 0 = auto: one scanline per art-pixel row
   config.cache_palettes = 0;        // share world-map palette textures instead of rebuilding them per frame (experimental)
   config.right_stick_mirror = 1;    // right stick emulates the left stick (movement)
   strlcpy(config.key_zl,    "key_zl",    sizeof(config.key_zl));    // unused buttons remap to themselves by default (no-op)

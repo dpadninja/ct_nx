@@ -36,6 +36,7 @@
 #include <switch.h>
 
 #include "config.h"
+#include "crt.h"
 #include "so_util.h"
 #include "util.h"
 #include "libc_shim.h"
@@ -1403,7 +1404,7 @@ DynLibFunction dynlib_functions[] = {
   { "glAttachShader", (uintptr_t)&glAttachShader },
   { "glBindAttribLocation", (uintptr_t)&glBindAttribLocation },
   { "glBindBuffer", (uintptr_t)&glBindBuffer },
-  { "glBindFramebuffer", (uintptr_t)&glBindFramebuffer },
+  { "glBindFramebuffer", (uintptr_t)&crt_glBindFramebuffer }, // CRT filter redirect, pass-through when off
   { "glBindRenderbuffer", (uintptr_t)&glBindRenderbuffer },
 #if DIAG_VERTS || DIAG_BIGQUAD
   { "glBindTexture", (uintptr_t)&glBindTexture_track },

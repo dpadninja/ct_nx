@@ -32,6 +32,7 @@
 #include "opensles.h"
 #include "asset.h"
 #include "util.h"
+#include "crt.h"
 
 static void (*g_gl_invalidate)(void); // cocos2d::GL::invalidateStateCache
 
@@ -144,6 +145,7 @@ static int gl_init(GLVid *g) {
 }
 
 static void gl_draw(GLVid *g, const uint8_t *rgba, int vw, int vh) {
+  crt_bind_window(); // movies go straight to the screen, not through the CRT filter
   // letterbox: fit vw x vh inside the surface preserving aspect ratio
   float sa = (float)g->sw / (float)g->sh, va = (float)vw / (float)vh;
   float ex = 1.0f, ey = 1.0f;

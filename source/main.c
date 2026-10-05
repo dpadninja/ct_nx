@@ -36,6 +36,7 @@
 #include "patches.h"
 #include "sprite_pool.h"
 #include "palette_cache.h"
+#include "crt.h"
 #include "sprite_census.h"
 #include "func_prof.h"
 
@@ -1082,6 +1083,7 @@ int main(void) {
 #endif
     sprite_pool_frame();
     palette_cache_frame();
+    crt_begin(screen_width, screen_height); // no-op unless crt_filter = 1
 #if SPRITE_CENSUS || FUNC_PROFILER
     const u64 census_t0 = armGetSystemTick();
 #endif
@@ -1092,6 +1094,7 @@ int main(void) {
 #if FUNC_PROFILER
     prof_frame(armGetSystemTick() - census_t0);
 #endif
+    crt_end();
 #if DEBUG_INSTR
     const u64 t_render_end = armGetSystemTick();
 #endif

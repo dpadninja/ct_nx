@@ -202,6 +202,32 @@ typedef struct {
   //             uploading a new one per object every frame (palette_cache.c).
   //             Same texture contents. 0 = stock (default while experimental).
   int cache_palettes;
+  // crt_filter -- draw every frame through a CRT shader (crt.c). Costs two
+  //             extra passes on the GPU.
+  //             0 = off
+  //             1 = soft: light retro look modelled on the CRT mode of the
+  //                 Pixel Remaster ports (fine scanlines, slight blur, red/
+  //                 blue fringing); keeps the picture sharp
+  //             2 = CRTS: port of Timothy Lottes' public-domain CRT-styled
+  //                 scaler (RetroArch's crt-lottes-fast), full tube look at
+  //                 console resolution
+  int   crt_filter;
+  // soft style (sizes in pixels at 720p, scaled with the resolution):
+  float crt_soft_scanlines; // darkening of the dark half of each scanline, 0..1
+  float crt_soft_lines;     // scanlines over the screen height
+  float crt_soft_blur;      // horizontal blur sigma
+  float crt_soft_fringe;    // red right / blue left offset
+  // CRTS style:
+  float crt_scanline_thinness; // 0 = fused .. 1 = thin scanlines (RetroArch: Scanline Intensity)
+  float crt_scan_blur;         // 1 = blurry .. 6 = sharp (RetroArch: Sharpness)
+  int   crt_mask_type;         // 0 none, 1 aperture grille lite, 2 aperture grille, 3 shadow mask
+  float crt_mask_intensity;    // 0..1
+  float crt_curvature;         // 0 = flat .. 0.25
+  float crt_corner;            // corner rounding 0..11
+  float crt_gamma;             // CRT gamma
+  float crt_brightness;        // extra brightness multiplier (both styles)
+  float crt_lines;             // scanlines over the screen height; 0 = auto
+                               // (360 / field_zoom with field_zoom_fix, else 216)
   // fixed_timestep -- 1 = force cocos2d's per-frame delta (Director::_deltaTime)
   //                   to a constant 1/60s instead of the measured wall-clock gap.
   //                   Vsync locks presentation to 60Hz, but the measured delta
