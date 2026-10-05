@@ -22,8 +22,6 @@ text_shadow_alpha = 200
 ; --- Performance ---
 gl_threaded = 0
 gl_no_error = 1
-reuse_draw_objects = 0
-cache_palettes = 0
 
 ; --- Runtime binary patches ---
 remove_mobile_ui = 1
@@ -39,6 +37,9 @@ field_zoom = 2
 map_zoom_fix = 1
 map_zoom = 2
 
+; --- Performance (experimental) ---
+reuse_draw_objects = 0
+cache_palettes = 0
 
 ; --- Input / controller ---
 native_controller = 1

@@ -51,6 +51,9 @@
   CONFIG_VAR_INT(force_nearest); \
   CONFIG_COMMENT("--- Performance ---"); \
   CONFIG_VAR_INT(fixed_timestep); \
+  CONFIG_COMMENT("--- Performance (experimental) ---"); \
+  CONFIG_VAR_INT(reuse_draw_objects); \
+  CONFIG_VAR_INT(cache_palettes); \
   CONFIG_COMMENT("--- Enhancements ---"); \
   CONFIG_VAR_INT(remove_mobile_ui); \
   CONFIG_VAR_INT(menu_alignment_fix); \
@@ -73,8 +76,6 @@
   CONFIG_VAR_INT(native_controller); \
   CONFIG_VAR_INT(controller_glyphs); \
   CONFIG_VAR_INT(fix_diagonal_movement); \
-  CONFIG_VAR_INT(reuse_draw_objects); \
-  CONFIG_VAR_INT(cache_palettes); \
   CONFIG_VAR_FLOAT(map_zoom_y_trim);
 
 Config config;
