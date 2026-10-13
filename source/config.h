@@ -394,6 +394,11 @@ typedef struct {
   // CONFIG_VARS_HIDDEN, so it can still be hand-added to config.ini for
   // testing; it just won't get written back out or shown to end users.
   float map_zoom_y_trim;
+  // settings_menu -- 1 = add the port's options as extra pages (L/R) of the
+  // in-game Settings menu; changes are written straight back to config.ini.
+  // See settings_menu.c. Hidden like map_zoom_y_trim: a kill switch, not a
+  // user setting.
+  int settings_menu;
   // Mod pack directory. Place .ctp files (ChronoMod-compatible Chrono Trigger
   // Patch archives) here and they will be applied to resources.bin at startup
   // without touching the original file. Paths are relative to the install

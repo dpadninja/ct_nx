@@ -86,6 +86,10 @@ automatically the first time you launch — an old `config.txt` becomes
 `config.ini` is created (or migrated from an older `config.txt`) on first run.
 It's grouped into sections; here's what each key does and its default.
 
+`language` and `remove_bilinear_filter` can also be changed in-game: open
+**Settings** and press **R** past the two stock pages. Each change is saved
+to `config.ini` right away and takes effect on the next launch.
+
 
 **Screen**
 * `screen_width_handheld` / `screen_height_handheld`, `screen_width_docked` /

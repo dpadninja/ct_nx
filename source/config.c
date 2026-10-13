@@ -76,7 +76,8 @@
   CONFIG_VAR_INT(native_controller); \
   CONFIG_VAR_INT(controller_glyphs); \
   CONFIG_VAR_INT(fix_diagonal_movement); \
-  CONFIG_VAR_FLOAT(map_zoom_y_trim);
+  CONFIG_VAR_FLOAT(map_zoom_y_trim); \
+  CONFIG_VAR_INT(settings_menu);
 
 Config config;
 
@@ -146,6 +147,7 @@ static void set_defaults(void) {
   config.field_zoom = 2.0f;           // 4x4 handheld / 6x6 art-px (original field_zoom_fix framing); lower = more map visible
   config.map_zoom_fix = 1;            // on by default
   config.map_zoom = 2.0f;             // 4x4 handheld / 6x6 art-px, matching field_zoom_fix's framing, once enabled
+  config.settings_menu = 1;           // port options as extra pages of the in-game Settings menu
   config.map_zoom_y_trim = 12.0f;     // dev-only fine-trim; hidden from write_config, see config.h
   strlcpy(config.mods_dir, "mods", sizeof(config.mods_dir)); // .ctp mod packs folder
 }

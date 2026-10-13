@@ -36,6 +36,7 @@
 #include "patches.h"
 #include "sprite_pool.h"
 #include "palette_cache.h"
+#include "settings_menu.h"
 #include "sprite_census.h"
 #include "func_prof.h"
 
@@ -834,6 +835,7 @@ int main(void) {
   // after the census so the pool hook sees the game's real return addresses
   apply_sprite_pool(&game_mod);
   apply_palette_cache(&game_mod);
+  apply_settings_menu(&game_mod);
 #if FUNC_PROFILER
   apply_func_prof(&game_mod);
 #endif
