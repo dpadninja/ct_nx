@@ -1095,13 +1095,6 @@ int main(void) {
 #if DEBUG_INSTR
     const u64 t_render_end = armGetSystemTick();
 #endif
-    // TEMPORARY -- drains the scroll-centering diagnostic snapshot that
-    // apply_field_scroll_debug_log() (patches.h) writes into homebrew
-    // memory every time FieldMap::Scroll() runs. Safe to call every frame
-    // even when the hook isn't installed (s_scroll_dbg_snap.seq just stays
-    // 0 forever, so nothing prints). Remove alongside the patches.h hook
-    // once the centering drift is diagnosed.
-    scroll_dbg_drain();
     // If a movie just finished, movie_post_render presents the last video frame
     // in place of whatever the engine drew this cycle (which may be black during
     // the scene transition). Once the hold count is exhausted it restores GL

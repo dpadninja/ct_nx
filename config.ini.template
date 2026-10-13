@@ -30,12 +30,9 @@ remove_bilinear_filter = 1
 fixed_timestep = 1
 ui_scale_fix = 1
 force_nearest = 0
+snes_video_mode = 1
 game_area_width_fix = 1
 menu_alignment_fix = 1
-field_zoom_fix = 1
-field_zoom = 2
-map_zoom_fix = 1
-map_zoom = 2
 
 ; --- Performance (experimental) ---
 reuse_draw_objects = 0

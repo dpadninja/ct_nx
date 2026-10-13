@@ -43,12 +43,11 @@
   CONFIG_VAR_INT(screen_height_handheld); \
   CONFIG_VAR_INT(screen_width_docked); \
   CONFIG_VAR_INT(screen_height_docked); \
-  CONFIG_VAR_FLOAT(field_zoom); \
-  CONFIG_VAR_FLOAT(map_zoom); \
   CONFIG_VAR_INT(ui_scale_fix); \
   CONFIG_COMMENT("--- Graphics ---"); \
   CONFIG_VAR_INT(remove_bilinear_filter); \
   CONFIG_VAR_INT(force_nearest); \
+  CONFIG_VAR_INT(snes_video_mode); \
   CONFIG_COMMENT("--- Performance ---"); \
   CONFIG_VAR_INT(fixed_timestep); \
   CONFIG_COMMENT("--- Performance (experimental) ---"); \
@@ -63,20 +62,15 @@
 // never emits them and a freshly generated config.ini never surfaces them to
 // end users. set_defaults() still seeds all of these, so they're fully
 // functional at their default value even though config.ini never shows them.
-// See map_zoom_y_trim's comment in config.h for why that one in particular
-// stays hidden.
 #define CONFIG_VARS_HIDDEN \
   CONFIG_VAR_FLOAT(game_font_xscale); \
   CONFIG_VAR_INT(gl_threaded); \
   CONFIG_VAR_INT(gl_no_error); \
   CONFIG_VAR_INT(cursor_fix); \
   CONFIG_VAR_INT(game_area_width_fix); \
-  CONFIG_VAR_INT(field_zoom_fix); \
-  CONFIG_VAR_INT(map_zoom_fix); \
   CONFIG_VAR_INT(native_controller); \
   CONFIG_VAR_INT(controller_glyphs); \
-  CONFIG_VAR_INT(fix_diagonal_movement); \
-  CONFIG_VAR_FLOAT(map_zoom_y_trim);
+  CONFIG_VAR_INT(fix_diagonal_movement);
 
 Config config;
 
@@ -142,11 +136,7 @@ static void set_defaults(void) {
   config.force_nearest = 0;           // off by default; enforce NEAREST on every texture at the GL wrapper (kills the bilinear upscale proven by the framebuffer screenshot)
   config.game_area_width_fix = 1;     // adaptive ctr::gameArea width (UI-layer consumers); no-op at stock 568 design
   config.menu_alignment_fix = 1;      // Equipment menu: drop stat/HP-block/button/equip-info text 1.5u to match the item list rows
-  config.field_zoom_fix = 1;          // square+integer field pixels (320x180 view); boot-time patch, relaunch to change
-  config.field_zoom = 2.0f;           // 4x4 handheld / 6x6 art-px (original field_zoom_fix framing); lower = more map visible
-  config.map_zoom_fix = 1;            // on by default
-  config.map_zoom = 2.0f;             // 4x4 handheld / 6x6 art-px, matching field_zoom_fix's framing, once enabled
-  config.map_zoom_y_trim = 12.0f;     // dev-only fine-trim; hidden from write_config, see config.h
+  config.snes_video_mode = 1;     // 9:8 SNES/TV pixels + sharp-bilinear; 0 = square pixel-perfect 4x4/6x6
   strlcpy(config.mods_dir, "mods", sizeof(config.mods_dir)); // .ctp mod packs folder
 }
 

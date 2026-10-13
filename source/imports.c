@@ -42,6 +42,7 @@
 #include "opensles.h"
 #include "asset.h"
 #include "imports.h"
+#include "sharp_filter.h"
 
 // ---------------------------------------------------------------------------
 // stack protector: libchrono imports __stack_chk_guard as a data symbol AND the
@@ -350,6 +351,7 @@ static void glTexImage2D_guard(GLenum target, GLint level, GLint internalformat,
     pixels = NULL; // the supplied buffer no longer matches the clamped size
   }
   glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+  sf_note_teximage(target, level, width, height);
   // Stamp NEAREST at creation so textures relying on GL default filtering
   // (default MAG filter is GL_LINEAR!) can never sample LINEAR.
   if (config.force_nearest && level == 0 && target == GL_TEXTURE_2D)
@@ -396,7 +398,7 @@ static int texTrack_get(GLuint id, GLsizei *w, GLsizei *h) {
 
 static void glBindTexture_track(GLenum target, GLuint texture) {
   if (target == GL_TEXTURE_2D) s_cur_tex2d = texture;
-  glBindTexture(target, texture);
+  sf_glBindTexture(target, texture);
 }
 
 static void glTexImage2D_guard_tracked(GLenum target, GLint level, GLint internalformat,
@@ -409,6 +411,7 @@ static void glTexImage2D_guard_tracked(GLenum target, GLint level, GLint interna
   }
   if (target == GL_TEXTURE_2D && level == 0) texTrack_set(s_cur_tex2d, width, height);
   glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+  sf_note_teximage(target, level, width, height);
 }
 #endif /* DIAG_VERTS || DIAG_BIGQUAD */
 
@@ -1399,8 +1402,8 @@ DynLibFunction dynlib_functions[] = {
   { "eglGetProcAddress", (uintptr_t)&eglGetProcAddress },
 
   // GLES2 fixed entry points (mesa libGLESv2)
-  { "glActiveTexture", (uintptr_t)&glActiveTexture },
-  { "glAttachShader", (uintptr_t)&glAttachShader },
+  { "glActiveTexture", (uintptr_t)&sf_glActiveTexture },
+  { "glAttachShader", (uintptr_t)&sf_glAttachShader },
   { "glBindAttribLocation", (uintptr_t)&glBindAttribLocation },
   { "glBindBuffer", (uintptr_t)&glBindBuffer },
   { "glBindFramebuffer", (uintptr_t)&glBindFramebuffer },
@@ -1408,7 +1411,7 @@ DynLibFunction dynlib_functions[] = {
 #if DIAG_VERTS || DIAG_BIGQUAD
   { "glBindTexture", (uintptr_t)&glBindTexture_track },
 #else
-  { "glBindTexture", (uintptr_t)&glBindTexture },
+  { "glBindTexture", (uintptr_t)&sf_glBindTexture },
 #endif
   { "glBlendColor", (uintptr_t)&glBlendColor },
   { "glBlendEquation", (uintptr_t)&glBlendEquation },
@@ -1437,7 +1440,7 @@ DynLibFunction dynlib_functions[] = {
   { "glClearDepthf", (uintptr_t)&glClearDepthf },
   { "glClearStencil", (uintptr_t)&glClearStencil },
   { "glColorMask", (uintptr_t)&glColorMask },
-  { "glCompileShader", (uintptr_t)&glCompileShader },
+  { "glCompileShader", (uintptr_t)&sf_glCompileShader },
   { "glCompressedTexImage2D", (uintptr_t)&glCompressedTexImage2D },
   { "glCompressedTexSubImage2D", (uintptr_t)&glCompressedTexSubImage2D },
   { "glCreateProgram", (uintptr_t)&glCreateProgram },
@@ -1445,24 +1448,24 @@ DynLibFunction dynlib_functions[] = {
   { "glCullFace", (uintptr_t)&glCullFace },
   { "glDeleteBuffers", (uintptr_t)&glDeleteBuffers },
   { "glDeleteFramebuffers", (uintptr_t)&glDeleteFramebuffers },
-  { "glDeleteProgram", (uintptr_t)&glDeleteProgram },
+  { "glDeleteProgram", (uintptr_t)&sf_glDeleteProgram },
   { "glDeleteRenderbuffers", (uintptr_t)&glDeleteRenderbuffers },
-  { "glDeleteShader", (uintptr_t)&glDeleteShader },
-  { "glDeleteTextures", (uintptr_t)&glDeleteTextures },
+  { "glDeleteShader", (uintptr_t)&sf_glDeleteShader },
+  { "glDeleteTextures", (uintptr_t)&sf_glDeleteTextures },
   { "glDepthFunc", (uintptr_t)&glDepthFunc },
   { "glDepthMask", (uintptr_t)&glDepthMask },
   { "glDepthRangef", (uintptr_t)&glDepthRangef },
   { "glDetachShader", (uintptr_t)&glDetachShader },
   { "glDisable", (uintptr_t)&glDisable },
   { "glDisableVertexAttribArray", (uintptr_t)&glDisableVertexAttribArray },
-  { "glDrawArrays", (uintptr_t)&glDrawArrays },
-  { "glDrawElements", (uintptr_t)&glDrawElements },
+  { "glDrawArrays", (uintptr_t)&sf_glDrawArrays },
+  { "glDrawElements", (uintptr_t)&sf_glDrawElements },
   { "glEnable", (uintptr_t)&glEnable },
   { "glEnableVertexAttribArray", (uintptr_t)&glEnableVertexAttribArray },
   { "glFinish", (uintptr_t)&glFinish },
   { "glFlush", (uintptr_t)&glFlush },
   { "glFramebufferRenderbuffer", (uintptr_t)&glFramebufferRenderbuffer },
-  { "glFramebufferTexture2D", (uintptr_t)&glFramebufferTexture2D },
+  { "glFramebufferTexture2D", (uintptr_t)&sf_glFramebufferTexture2D },
   { "glFrontFace", (uintptr_t)&glFrontFace },
   { "glGenBuffers", (uintptr_t)&glGenBuffers },
   { "glGenFramebuffers", (uintptr_t)&glGenFramebuffers },
@@ -1488,7 +1491,7 @@ DynLibFunction dynlib_functions[] = {
   { "glIsEnabled", (uintptr_t)&glIsEnabled },
   { "glIsRenderbuffer", (uintptr_t)&glIsRenderbuffer },
   { "glLineWidth", (uintptr_t)&glLineWidth },
-  { "glLinkProgram", (uintptr_t)&glLinkProgram },
+  { "glLinkProgram", (uintptr_t)&sf_glLinkProgram },
   { "glMapBufferOES", (uintptr_t)&gl_MapBufferOES },
   { "glUnmapBufferOES", (uintptr_t)&gl_UnmapBufferOES },
   { "glPixelStorei", (uintptr_t)&glPixelStorei },
@@ -1496,7 +1499,7 @@ DynLibFunction dynlib_functions[] = {
   { "glReadPixels", (uintptr_t)&glReadPixels },
   { "glRenderbufferStorage", (uintptr_t)&glRenderbufferStorage },
   { "glScissor", (uintptr_t)&glScissor },
-  { "glShaderSource", (uintptr_t)&glShaderSource },
+  { "glShaderSource", (uintptr_t)&sf_glShaderSource },
   { "glStencilFunc", (uintptr_t)&glStencilFunc },
   { "glStencilFuncSeparate", (uintptr_t)&glStencilFuncSeparate },
   { "glStencilMask", (uintptr_t)&glStencilMask },
@@ -1534,7 +1537,7 @@ DynLibFunction dynlib_functions[] = {
 #else
   { "glUniformMatrix4fv", (uintptr_t)&glUniformMatrix4fv },
 #endif
-  { "glUseProgram", (uintptr_t)&glUseProgram },
+  { "glUseProgram", (uintptr_t)&sf_glUseProgram },
   { "glValidateProgram", (uintptr_t)&glValidateProgram },
   { "glVertexAttrib1f", (uintptr_t)&glVertexAttrib1f },
   { "glVertexAttrib2fv", (uintptr_t)&glVertexAttrib2fv },

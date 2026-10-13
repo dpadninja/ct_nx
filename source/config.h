@@ -278,122 +278,23 @@ typedef struct {
   // no other menu shares these code paths. Boot-time binary patch:
   // relaunch to change.
   int menu_alignment_fix;
-  // field_zoom_fix -- 1 = set the field view's design->art densities to
-  // exactly 1/2 on both axes (see patches.h section 9). View becomes 320x180
-  // art px: art pixels are square AND integer (4px handheld / 6px docked) in
-  // both modes -- no aspect stretch, no uneven pixel widths, no motion
-  // shimmer. 0 = the shipped CRT-style 9/8 wide-pixel presentation. Field
-  // camera only; menus/UI unaffected. Boot-time patch: relaunch to change.
-  int field_zoom_fix;
-  // field_zoom -- camera zoom level for the field screen. Only used while
-  // field_zoom_fix is on. Two things move together when you change
-  // this (patches.h: apply_field_view_zoom + apply_field_zoom):
-  //   1. The VIEW (how much of the map is captured -- FieldMap::init and
-  //      setScrollLimit): view_art_px = 640x360 / zoom.
-  //   2. The BLIT scale (the "fieldmap" node's setScale, on top of the
-  //      outer 2x-handheld/3x-docked display scale from
-  //      ui_scale_fix): the node is drawn at view_art_px * zoom.
-  // Those two are reciprocal by construction, so the LOGICAL drawn size is
-  // always exactly 640x360 design units.
-  //
-  // IMPORTANT, STILL-OPEN CAVEAT: the field background isn't drawn live --
-  // it's rendered once per scroll step into five fixed-size 432x224 art-px
-  // RenderTextures allocated in FieldMap::makeField, sized for the stock
-  // 320x180 view with a fixed scroll-ahead margin. #1/#2 above resize the
-  // *logical* view and blit scale correctly, but NOT that physical texture,
-  // which patches.h does not yet touch (would require rewriting ~40
-  // interdependent constants inside the 2700-instruction FieldMap::Scroll
-  // function -- tracked, not yet done). Net effect: the "always fills the
-  // screen" claim above only holds while the requested view still fits
-  // inside that fixed 432x224 texture, i.e.
-  //     zoom >= max(640/432, 360/224) = ~1.61
-  // Below ~1.61 the texture itself becomes the bottleneck: you'll see the
-  // same fixed-size patch of map, anchored to a corner, with black in the
-  // remaining screen area, rather than more map. Stay at 1.65+ for a safe
-  // margin. Going lower is the actual "see more map" feature Patrick wants
-  // and needs the Scroll-function rewrite above before it'll work right.
-  //
-  // Final art-pixel size on screen = field_zoom * 2 (handheld) and
-  // field_zoom * 3 (docked). Default 2.0 reproduces the original shipped
-  // field_zoom_fix framing (4x4 handheld / 6x6 docked).
-  //   Lower  = zoomed OUT (see more of the map, smaller on-screen tiles)
-  //   Higher = zoomed IN  (see less of the map, bigger on-screen tiles)
-  // Always renders square (X==Y), so it never stretches. But since
-  // gcd(2,3)=1, only WHOLE-NUMBER values keep the art-pixel size an exact
-  // integer -- and therefore free of the sub-pixel scroll shimmer the other
-  // patches above fix -- in BOTH handheld and docked at once:
-  //   2.0 -> 4x/6x (default), 3.0 -> 6x/9x, 4.0 -> 8x/12x ...
-  // (1.0 -> 2x/3x would also qualify but is below the ~1.61 floor above.)
-  // Non-integer values still render square/undistorted within the safe
-  // range, just without the shimmer-free guarantee in whichever mode it
-  // doesn't divide evenly for. One in-between value that DOES stay exact in
-  // both modes and clears the ~1.61 floor: 5/3 (~1.667 -> 3.333x/5x).
-  // Boot-time patch: relaunch to change.
-  float field_zoom;
-  // map_zoom_fix -- 1 = square up the WorldMap (overworld) node's draw
-  // scale, the same non-square-pixel bug field_zoom_fix fixes for the
-  // field screens: WorldMap hardcodes the identical (1.875, 1.66667)
-  // setScale(x,y) pair at its own map-node sites, so it inherits the same
-  // 9/8 wide-pixel stretch. 0 = leave WorldMap at the shipped CRT-style
-  // presentation. See patches.h (apply_map_zoom) for the full derivation.
-  //
-  // Ships with a companion node-anchor correction (patches.h:
-  // apply_map_node_anchor) that re-centers the WorldMap node at any zoom --
-  // X was proven correct quickly; Y went through the same kind of
-  // multi-round revision field_zoom_fix's own Y fix needed (see
-  // apply_map_node_anchor's header for the current formula and reasoning,
-  // including why it now targets true screen center rather than stock's
-  // original UI-margin-preserving framing, now that remove_mobile_ui hides
-  // the button row that framing existed for). Still test on real hardware
-  // before straying far from the default -- this file's own history is a
-  // standing reminder that per-axis, per-zoom real-device confirmation is
-  // what actually settles these, not algebra alone. Boot-time patch:
-  // relaunch to change.
-  int map_zoom_fix;
-  // map_zoom -- draw scale for the WorldMap node. Only used while
-  // map_zoom_fix is on. Mirrors field_zoom's role but for the overworld
-  // map instead of the field screens.
-  //
-  // Final art-pixel size on screen = map_zoom * 2 (handheld) and
-  // map_zoom * 3 (docked), same as field_zoom (both ride the same
-  // ui_scale_fix outer scale). Default 2.0 gives square, integer
-  // (4x4 handheld / 6x6 docked) art pixels -- the direct WorldMap
-  // counterpart of field_zoom_fix's original fixed correction, and the
-  // same accepted trade-off: the map is drawn very slightly larger than
-  // stock (stock's 1.875/1.66667 vs 2.0/2.0), so a hair less of it is
-  // visible edge-to-edge. That's a uniform resize, not a display bug --
-  // nothing about position/anchoring changes.
-  //   Lower  = smaller on-screen tiles (more headroom before any as-yet-
-  //            unverified container/RenderTexture limit is hit -- see the
-  //            caveat above)
-  //   Higher = bigger on-screen tiles
-  // As with field_zoom, only whole-number values are guaranteed integer
-  // (shimmer-free) art pixels in BOTH handheld and docked at once, since
-  // gcd(2,3) = 1.
-  float map_zoom;
-  // map_zoom_y_trim -- manual, empirical fine-trim (design px) added on top
-  // of apply_map_node_anchor's round-2 vertical centering formula. Default
-  // 12.0 is the current best-known trim at the default map_zoom (see the
-  // ROUND 3 caveat below for why 0.0 isn't the safe/proven baseline here).
-  // Exists because the party-leader sprite is drawn into its own separate
-  // 544x256 RenderTexture (WorldObjectManager::Draw1/Draw2, composited by
-  // the same node this trim adjusts) using a zoom-blind, SNES-native-224-
-  // tall inner coordinate system that hasn't been proven to share the same
-  // effective center as the 192-art-px window the outer node math targets
-  // -- see apply_map_node_anchor's header ("ROUND 3") for the full
-  // disassembly trail. Positive values move the whole map (background +
-  // sprites, together, as one composited unit) UP the screen. If your
-  // character sits low, increase this in small steps (try 5-10 at a time)
-  // and relaunch until it looks centered at your own map_zoom. Boot-time
-  // patch: relaunch to change.
-  //
-  // DEV-ONLY, INTENTIONALLY HIDDEN: this is a fine-tuning knob, not a
-  // user-facing setting, so it's deliberately left out of write_config's
-  // CONFIG_VARS list (see config.c) -- a fresh/regenerated config.ini will
-  // never contain this key. read_config still recognizes it via
-  // CONFIG_VARS_HIDDEN, so it can still be hand-added to config.ini for
-  // testing; it just won't get written back out or shown to end users.
-  float map_zoom_y_trim;
+  // snes_video_mode -- how the field (and world map) is framed and sampled.
+  //   1 (default) -- SNES-like picture: wide (~9:8, TV-style) art pixels and
+  //            the full 224-row SNES picture height on the field (stock
+  //            Android shows only 216 of the 224 rows; patches.h:
+  //            apply_field_snes_geometry). The world map keeps the stock
+  //            9:8 framing. The fractional scale (~3.6x3.2 handheld,
+  //            ~5.4x4.8 docked) is drawn with a sharp-bilinear sampler
+  //            (sharp_filter.c) instead of plain NEAREST, so every art-pixel
+  //            column is the same width and scrolling doesn't shimmer; only
+  //            the one screen pixel on each art-pixel boundary is blended.
+  //            Integer-scaled draws (UI, render-to-texture) come out
+  //            identical to NEAREST.
+  //   0 -- pixel-perfect square pixels at a fixed 4x4 handheld /
+  //            6x6 docked (view 320x180 art px; patches.h: field/map zoom
+  //            patches at SQUARE_ZOOM).
+  // Boot-time: relaunch to change.
+  int snes_video_mode;
   // Mod pack directory. Place .ctp files (ChronoMod-compatible Chrono Trigger
   // Patch archives) here and they will be applied to resources.bin at startup
   // without touching the original file. Paths are relative to the install

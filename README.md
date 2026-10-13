@@ -149,7 +149,7 @@ It's grouped into sections; here's what each key does and its default.
   identical contents. Off by default while it is experimental.
 
 **Visual & movement fixes** — these smooth out a handful of quirks left over
-from the original phone version: filtering, alignment, camera zoom, and a
+from the original phone version: filtering, alignment, pixel aspect, and a
 shimmering/stuttering look during movement. Each flag below is independent
 and safe to turn off if it ever causes trouble; most take effect on your next
 launch rather than instantly.
@@ -174,12 +174,12 @@ launch rather than instantly.
   the same phone-resolution mismatch as `ui_scale_fix`.
 * `menu_alignment_fix` *(default 1)* — straightens out text that sits
   slightly too high on the Equipment menu.
-* `field_zoom_fix` *(default 1)* / `field_zoom` *(default 2.0)* — fixes an
-  uneven zoom on the field camera that's the real cause of the shimmer you
-  see while scrolling around. `field_zoom` sets how zoomed in the camera is —
-  lower shows more map, higher shows less. Recommend values are currently 2.0 and 1.75.
-* `map_zoom_fix` *(default 1)* / `map_zoom` *(default 2.0)* — the same fix
-  and zoom control, for the overworld map screen. Recommend values are currently 2.0 and 1.75.
+* `snes_video_mode` *(default 1)* — SNES-like picture. `1` keeps the
+  original slightly-wide pixels, the way the game looked on a TV, shows the
+  full SNES picture height on the field (the phone version crops a few rows),
+  and draws it with a sharp-bilinear filter so scrolling doesn't shimmer and
+  the image stays crisp. `0` gives perfectly square, pixel-perfect pixels
+  (4×4 handheld, 6×6 docked) with a slightly tighter camera.
 
 **Input / controller**
 * `native_controller` *(default 1)* — drive the engine purely through its
